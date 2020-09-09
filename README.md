@@ -21,10 +21,14 @@ Flags:
   --zoom   Max zoom depth to prime to. Usually in the range of 0-18 but can go deeper.
   --cc     Maximum request concurrency. Defaults to 4 simultaneous requests.
              Take care not to exceed the rate limits of your tile provider!
+  --header Add headers to all requests. Usage `--header name:value`.
   --help   Shows this help menu.
 
 Usage:
+  xyz --url tile.company.com/{x}/{y}/{z}.png
   xyz --url tile.company.com/{x}/{y}/{z}.png --zoom 8
+  xyz --url tile.company.com/{x}/{y}/{z}.png --zoom 8 --cc 16
+  xyz --url tile.company.com/{x}/{y}/{z}.png --header X-Auth-Token:8675309abcd
 ```
 
 ## Roadmap
