@@ -44,6 +44,8 @@ var (
 	totalTiles  = int64(0)
 	failed      = 0
 	totalFailed = 0
+
+	client http.Client
 )
 
 func init() {
@@ -167,14 +169,25 @@ func prime(url string, zoom, cc int, headers headerFlags) {
 // work queue. This enables request concurrency.
 func worker(payload *workerPayload) {
 	for tile := range payload.tiles {
-		req, err := http.Get(buildURL(payload.url, tile.x, tile.y, tile.zoom))
+		req, err := http.NewRequest(http.MethodGet, buildURL(payload.url, tile.x, tile.y, tile.zoom), nil)
+		if err != nil {
+			// clear bar and log error before it redraws
+			_ = payload.bar.Clear()
+			_ = fmt.Errorf("request error: %s", err.Error())
+			payload.ack <- false
+			return
+		}
+		// populate headers in request
+		req.Header = payload.headers.header
+		// perform tile request
+		res, err := client.Do(req)
 		if err != nil {
 			// clear bar and log error before it redraws
 			_ = payload.bar.Clear()
 			_ = fmt.Errorf("request error: %s", err.Error())
 			payload.ack <- false
 		} else {
-			payload.ack <- req.StatusCode == 200
+			payload.ack <- res.StatusCode == 200
 		}
 		_ = payload.bar.Add(1)
 	}
@@ -220,12 +233,15 @@ type workerPayload struct {
 }
 
 // headerFlags is a value struct allowing us to read in HTTP headers from flags
-type headerFlags []string
+type headerFlags struct {
+	flat   []string
+	header http.Header
+}
 
 // String returns all HTTP headers set for this run of xyz
 func (h *headerFlags) String() string {
 	headers := ""
-	for _, header := range *h {
+	for _, header := range h.flat {
 		headers += ", \"" + header + "\""
 	}
 	return headers
@@ -233,6 +249,15 @@ func (h *headerFlags) String() string {
 
 // Set appends a new header pair onto the header stack
 func (h *headerFlags) Set(value string) error {
-	*h = append(*h, value)
+	h.flat = append(h.flat, value)
+	headerParts := strings.Split(value, ":")
+	if len(headerParts) != 2 {
+		_ = fmt.Errorf("invalid header format specified: `%s`, must be in format `name:value`", value)
+		os.Exit(1)
+	}
+	if h.header == nil {
+		h.header = http.Header{}
+	}
+	h.header.Add(headerParts[0], headerParts[1])
 	return nil
 }
