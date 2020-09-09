@@ -43,9 +43,9 @@ servers might go beyond that.
 
 | Level | # Tiles | Tile width (° of longitudes) | m / pixel (on Equator) | ~ Scale(on screen) | Examples of areas to represent|
 |-------|---------|------------------------------|------------------------|--------------------|-------------------------------|
-| 0 | 1 |360 |156 412 |1:500m |whole world |
+| 0 | 1 |360 |156,412 |1:500m |whole world |
 |1 | 4 | 180 | 78,206 | 1:250m |
-|2 | 16 | 9039 | 103 | 1:150m | subcontinental area |
+|2 | 16 | 90 | 39,103 | 1:150m | subcontinental area |
 |3 | 64 | 45 | 19,551 | 1:70m | largest country |
 |4 | 256 | 22.5 | 9,776 | 1:35m |
 |5 | 1,024 | 11.25 | 4,888 | 1:15m | large African country |
