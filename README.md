@@ -19,7 +19,7 @@ or clone the repo and compile it yourself.
 Flags:
   --url    Templated cache URL to prime. Ex: tile.company.com/{x}/{y}/{z}.png
   --zoom   Max zoom depth to prime to. Usually in the range of 0-18 but can go deeper.
-  --cc    Maximum request concurrency. Defaults to 4 simultaneous requests.
+  --cc     Maximum request concurrency. Defaults to 4 simultaneous requests.
              Take care not to exceed the rate limits of your tile provider!
   --help   Shows this help menu.
 
