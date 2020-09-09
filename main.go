@@ -1,3 +1,27 @@
+/**
+ * MIT License
+ *
+ * Copyright (c) 2020 Andrew DeChristopher
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package main
 
 import (
@@ -157,7 +181,7 @@ func printHelp() {
 	fmt.Printf("\nFlags:\n" +
 		"  --url    Templated cache URL to prime. Ex: tile.company.com/{x}/{y}/{z}.png\n" +
 		"  --zoom   Max zoom depth to prime to. Usually in the range of 0-18 but can go deeper.\n" +
-		"  -- cc    Maximum request concurrency. Defaults to 4 simultaneous requests." +
+		"  --cc    Maximum request concurrency. Defaults to 4 simultaneous requests." +
 		"             Take care not to exceed the rate limits of your tile provider!\n" +
 		"  --help   Shows this help menu.\n\n" +
 		"Usage:\n" +
