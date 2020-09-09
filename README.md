@@ -1,16 +1,15 @@
 # xyz-cache-primer
-Simple tool to prime XYZ tile caches to a given zoom level.
+Simple tool to procedurally prime XYZ tile caches to a given zoom level.
 
 ## About
-This tool, given the URL to an XYZ tile caching proxy, will iteratively and
-concurrently generate and execute requests for every tile at every zoom level
-up to the maximum zoom level specified. Concurrency is optional and configurable.
-It doe not currently support header, cookie, or session-based authentication,
-however this is on the roadmap.
+This tool, given the URL to an XYZ tile caching proxy, will procedurally generate
+and execute requests for every tile at every zoom level up to the maximum zoom level
+specified. Concurrency is optional and configurable. Headers for authentication or
+user agent spoofing can be specified using [command line flags](#usage).
 
 ## Releases:
 To get a copy of XYZ, either visit the [releases page](https://github.com/dechristopher/xyz-cache-primer/releases)
-or clone the repo and compile it yourself. 
+or clone the repo and compile it yourself.
 
 > The current Go version requirement is 1.14+
 
@@ -32,18 +31,20 @@ Usage:
 ```
 
 ## Roadmap
-* Add optional HTTP headers and auth settings
-* Improve memory footprint
-* Improve concurrency
+* Improve HTTP request performance
+* Shrink HTTP response memory footprint
+* Improve concurrency model
 
-## About XYZ Tiles
+## About Map Tiles
 Splitting the world into square tiles is a simple way to distribute geographic information and metadata to devices.
-From raster data representing illustrated or generated cartography to vector data representing infrastructure, tiles
-optimize the time and space necessary to gather pieces of information in a way to illustrate a geographic region and
-its relevant metadata.
+From raster data representing illustrated or generated cartography to vector data representing infrastructure and other
+arbitrary geometries, tiles optimize the time and space necessary to gather pieces of grographic information. This
+allows us to quickly illustrate a geographic region and its associated attributes.
 
+### Zoom Level
 The zoom parameter is an integer between 0 (zoomed out) and 18 (zoomed in). 18 is normally the maximum, but some tile
-servers might go beyond that.
+servers might go beyond that. A tile at a given zoom level will split into four equally sized tiles at the next
+zoom level.
 
 | Level | # Tiles | Tile width (° of longitudes) | m / pixel (on Equator) | ~ Scale(on screen) | Examples of areas to represent|
 |-------|---------|------------------------------|------------------------|--------------------|-------------------------------|
@@ -73,6 +74,7 @@ servers might go beyond that.
 This is useful when calculating storage requirements for pre-generated tiles.
 - The "° Tile width" column gives the map width in degrees of longitude, for a square tile drawn at that zoom level.
 - Values listed in the column "m / pixels" gives the number of meters per pixel at that zoom level. These values for
-"m / pixel" are calculated with an Earth radius of 6372.7982 km and hold at the Equator; for other latitudes the values must be multiplied by the cosine (approximately assuming a perfect spheric shape of the geoid) of the latitude.
+ "m / pixel" are calculated with an Earth radius of 6372.7982 km and hold at the Equator; for other latitudes the values
+ must be multiplied by the cosine (approximately assuming a perfect spheric shape of the geoid) of the latitude.
 
 Ref: https://wiki.openstreetmap.org/wiki/Zoom_levels
