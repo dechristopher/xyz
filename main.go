@@ -40,6 +40,7 @@ import (
 const version = "0.0.1"
 
 var (
+	headers     headerFlags
 	totalTiles  = int64(0)
 	failed      = 0
 	totalFailed = 0
@@ -62,6 +63,7 @@ func main() {
 	url := flag.String("url", "", "Templated cache URL to prime. Ex: tile.company.com/{x}/{y}/{z}.png")
 	zoom := flag.Int("zoom", 4, "Max zoom depth to prime to. Defaults to 4. Usually in the range of 0-18 but can go deeper.")
 	cc := flag.Int("cc", 4, "Maximum request concurrency. Defaults to 4 simultaneous requests. Take care not to exceed rate limits.")
+	flag.Var(&headers, "header", "Add headers to all requests. Usage `--header name:value`")
 	help := flag.Bool("help", false, "Shows this help menu.")
 	flag.Parse()
 
@@ -93,14 +95,14 @@ func main() {
 	fmt.Printf("Config OK. URL: %s, Max zoom: %d, Concurrency: %d\n\n", *url, *zoom, *cc)
 
 	// run the primer
-	prime(*url, *zoom, *cc)
+	prime(*url, *zoom, *cc, headers)
 
 	os.Exit(0)
 }
 
 // prime populates work queues, iteratively and concurrently priming the given
 // cache by requesting all tiles at every zoom level up to the one you specify
-func prime(url string, zoom, cc int) {
+func prime(url string, zoom, cc int, headers headerFlags) {
 	// begin priming caches starting at zoom level 0
 	for z := 0; z <= zoom; z++ {
 		numTiles := int64(math.Pow(float64(2), float64(2*z)))
@@ -113,12 +115,22 @@ func prime(url string, zoom, cc int) {
 
 		bar := progressbar.Default(numTiles, fmt.Sprintf("Priming zoom level %d:", z))
 
+		// create worker payload
+		payload := workerPayload{
+			url:     url,
+			headers: headers,
+			tiles:   tiles,
+			ack:     ack,
+			bar:     bar,
+		}
+
 		// spin up workers
 		for w := 0; w < cc; w++ {
-			go worker(url, tiles, ack, bar)
+			go worker(&payload)
 		}
 
 		// create tile requests for workers to process
+		// and add them to the tiles work queue
 		for x := 0; x < rowCol; x++ {
 			for y := 0; y < rowCol; y++ {
 				req := tileRequest{
@@ -152,19 +164,19 @@ func prime(url string, zoom, cc int) {
 }
 
 // worker spins up a worker to receive tile requests off of the
-// worker queue. This enables request concurrency.
-func worker(url string, tiles <-chan tileRequest, ack chan<- bool, bar *progressbar.ProgressBar) {
-	for tile := range tiles {
-		req, err := http.Get(buildURL(url, tile.x, tile.y, tile.zoom))
+// work queue. This enables request concurrency.
+func worker(payload *workerPayload) {
+	for tile := range payload.tiles {
+		req, err := http.Get(buildURL(payload.url, tile.x, tile.y, tile.zoom))
 		if err != nil {
 			// clear bar and log error before it redraws
-			_ = bar.Clear()
+			_ = payload.bar.Clear()
 			_ = fmt.Errorf("request error: %s", err.Error())
-			ack <- false
+			payload.ack <- false
 		} else {
-			ack <- req.StatusCode == 200
+			payload.ack <- req.StatusCode == 200
 		}
-		_ = bar.Add(1)
+		_ = payload.bar.Add(1)
 	}
 }
 
@@ -183,6 +195,7 @@ func printHelp() {
 		"  --zoom   Max zoom depth to prime to. Usually in the range of 0-18 but can go deeper.\n" +
 		"  --cc     Maximum request concurrency. Defaults to 4 simultaneous requests." +
 		"             Take care not to exceed the rate limits of your tile provider!\n" +
+		"  --header Add headers to all requests. Usage `--header name:value`.\n" +
 		"  --help   Shows this help menu.\n\n" +
 		"Usage:\n" +
 		"  xyz --url tile.company.com/{x}/{y}/{z}.png --zoom 8\n")
@@ -194,4 +207,32 @@ type tileRequest struct {
 	zoom int
 	x    int
 	y    int
+}
+
+// workerPayload holds all necessary information that a worker routine
+// needs to make requests and finish its work
+type workerPayload struct {
+	url     string
+	headers headerFlags
+	tiles   <-chan tileRequest
+	ack     chan<- bool
+	bar     *progressbar.ProgressBar
+}
+
+// headerFlags is a value struct allowing us to read in HTTP headers from flags
+type headerFlags []string
+
+// String returns all HTTP headers set for this run of xyz
+func (h *headerFlags) String() string {
+	headers := ""
+	for _, header := range *h {
+		headers += ", \"" + header + "\""
+	}
+	return headers
+}
+
+// Set appends a new header pair onto the header stack
+func (h *headerFlags) Set(value string) error {
+	*h = append(*h, value)
+	return nil
 }
