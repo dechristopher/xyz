@@ -1,8 +1,8 @@
 # XYZ Tile Cache Primer
 <p align="center"><img src=".github/xyz.png" width="384" alt="XYZ Logo"></p>
 <p align="center">
-  <a href="https://github.com/dechristopher/xyz-cache-primer/actions"><img alt="XYZ Build Status" src="https://github.com/dechristopher/xyz-cache-primer/workflows/Build/badge.svg"></a>
-  <a href="https://goreportcard.com/report/github.com/dechristopher/xyz-cache-primer"><img alt="XYZ Go Report Card" src="https://goreportcard.com/badge/github.com/dechristopher/xyz-cache-primer"></a>
+  <a href="https://github.com/dechristopher/xyz/actions"><img alt="XYZ Build Status" src="https://github.com/dechristopher/xyz/workflows/Build/badge.svg"></a>
+  <a href="https://goreportcard.com/report/github.com/dechristopher/xyz"><img alt="XYZ Go Report Card" src="https://goreportcard.com/badge/github.com/dechristopher/xyz"></a>
 </p>
 
 - [About](#about)
@@ -49,7 +49,7 @@ overview on how to use the tool in its entirety:
 * Improve concurrency model [(#5)][i5]
 
 ## Releases
-To get a copy of XYZ, either visit the [releases page](https://github.com/dechristopher/xyz-cache-primer/releases)
+To get a copy of XYZ, either visit the [releases page](https://github.com/dechristopher/xyz/releases)
 or clone the repo and compile it yourself.
 
 > The current Go version requirement to build is 1.14+
@@ -98,6 +98,6 @@ This is useful when calculating storage requirements for pre-generated tiles.
 
 Ref: https://wiki.openstreetmap.org/wiki/Zoom_levels
 
-[i3]: https://github.com/dechristopher/xyz-cache-primer/issues/3
-[i4]: https://github.com/dechristopher/xyz-cache-primer/issues/4
-[i5]: https://github.com/dechristopher/xyz-cache-primer/issues/5
+[i3]: https://github.com/dechristopher/xyz/issues/3
+[i4]: https://github.com/dechristopher/xyz/issues/4
+[i5]: https://github.com/dechristopher/xyz/issues/5
