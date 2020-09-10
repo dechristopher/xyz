@@ -1,5 +1,18 @@
 # xyz-cache-primer
-Simple tool to procedurally prime XYZ tile caches to a given zoom level.
+<p align="center"><img src=".github/xyz.png" alt="XYZ Logo"></p>
+<p align="center">
+  <a href="https://github.com/dechristopher/xyz-cache-primer/actions"><img alt="XYZ Build Status" src="https://github.com/dechristopher/xyz-cache-primer/workflows/Build/badge.svg"></a>
+  <a href="https://goreportcard.com/report/github.com/dechristopher/xyz-cache-primer"><img alt="XYZ Go Report Card" src="https://goreportcard.com/badge/github.com/dechristopher/xyz-cache-primer"></a>
+</p>
+
+- [About](#about)
+- [Usage](#usage)
+  - [Flags](#flags)
+  - [Examples](#examples)
+- [Roadmap](#roadmap)
+- [Releases](#releases)
+- [Map Tiles Overview](#map-tiles-overview)
+  - [Zoom Level](#zoom-level)
 
 ## About
 This tool, given the URL to an XYZ tile caching proxy, will procedurally generate
@@ -7,23 +20,23 @@ and execute requests for every tile at every zoom level up to the maximum zoom l
 specified. Concurrency is optional and configurable. Headers for authentication or
 user agent spoofing can be specified using [command line flags](#usage).
 
-## Releases:
-To get a copy of XYZ, either visit the [releases page](https://github.com/dechristopher/xyz-cache-primer/releases)
-or clone the repo and compile it yourself.
+## Usage
+XYZ has been designed to be as simple as possible. It will not have a rich feature set
+primarily because the scope of the problem it solves isn't very wide. Here is a brief
+overview on how to use the tool in its entirety:
 
-> The current Go version requirement is 1.14+
-
-## Usage:
+### Flags
 ```
-Flags:
   --url    Templated cache URL to prime. Ex: tile.company.com/{x}/{y}/{z}.png
   --zoom   Max zoom depth to prime to. Usually in the range of 0-18 but can go deeper.
   --cc     Maximum request concurrency. Defaults to 4 simultaneous requests.
              Take care not to exceed the rate limits of your tile provider!
   --header Add headers to all requests. Usage `--header name:value`.
   --help   Shows this help menu.
+```
 
-Usage:
+### Examples
+```
   xyz --url tile.company.com/{x}/{y}/{z}.png
   xyz --url tile.company.com/{x}/{y}/{z}.png --zoom 8
   xyz --url tile.company.com/{x}/{y}/{z}.png --zoom 8 --cc 16
@@ -35,7 +48,13 @@ Usage:
 * Shrink HTTP response memory footprint [(#4)][i4]
 * Improve concurrency model [(#5)][i5]
 
-## About Map Tiles
+## Releases
+To get a copy of XYZ, either visit the [releases page](https://github.com/dechristopher/xyz-cache-primer/releases)
+or clone the repo and compile it yourself.
+
+> The current Go version requirement to build is 1.14+
+
+## Map Tiles Overview
 Splitting the world into square tiles is a simple way to distribute geographic information and metadata to devices.
 From raster data representing illustrated or generated cartography to vector data representing infrastructure and other
 arbitrary geometries, tiles optimize the time and space necessary to gather pieces of grographic information. This
