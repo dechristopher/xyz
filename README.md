@@ -31,9 +31,9 @@ Usage:
 ```
 
 ## Roadmap
-* Improve HTTP request performance
-* Shrink HTTP response memory footprint
-* Improve concurrency model
+* Improve HTTP request performance [(#3)][i3]
+* Shrink HTTP response memory footprint [(#4)][i4]
+* Improve concurrency model [(#5)][i5]
 
 ## About Map Tiles
 Splitting the world into square tiles is a simple way to distribute geographic information and metadata to devices.
@@ -78,3 +78,7 @@ This is useful when calculating storage requirements for pre-generated tiles.
  must be multiplied by the cosine (approximately assuming a perfect spheric shape of the geoid) of the latitude.
 
 Ref: https://wiki.openstreetmap.org/wiki/Zoom_levels
+
+[i3]: https://github.com/dechristopher/xyz-cache-primer/issues/3
+[i4]: https://github.com/dechristopher/xyz-cache-primer/issues/4
+[i5]: https://github.com/dechristopher/xyz-cache-primer/issues/5
