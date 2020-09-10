@@ -1,4 +1,4 @@
-# xyz-cache-primer
+# XYZ Tile Cache Primer
 <p align="center"><img src=".github/xyz.png" width="384" alt="XYZ Logo"></p>
 <p align="center">
   <a href="https://github.com/dechristopher/xyz-cache-primer/actions"><img alt="XYZ Build Status" src="https://github.com/dechristopher/xyz-cache-primer/workflows/Build/badge.svg"></a>
