@@ -62,11 +62,11 @@ func init() {
 
 func main() {
 	// define command line flags
-	url := flag.String("url", "", "Templated cache URL to prime. Ex: tile.company.com/{x}/{y}/{z}.png")
-	zoom := flag.Int("zoom", 4, "Max zoom depth to prime to. Defaults to 4. Usually in the range of 0-18 but can go deeper.")
-	cc := flag.Int("cc", 4, "Maximum request concurrency. Defaults to 4 simultaneous requests. Take care not to exceed rate limits.")
-	flag.Var(&headers, "header", "Add headers to all requests. Usage `--header name:value`")
-	help := flag.Bool("help", false, "Shows this help menu.")
+	url := flag.String("url", "", usageUrl)
+	zoom := flag.Int("zoom", 4, usageZoom)
+	cc := flag.Int("cc", 4, usageCc)
+	flag.Var(&headers, "header", usageHeader)
+	help := flag.Bool("help", false, usageHelp)
 	flag.Parse()
 
 	// print help message if requested
@@ -193,28 +193,6 @@ func worker(payload *workerPayload) {
 	}
 }
 
-// buildURL places the given X, Y, and Z values into the given URL template.
-func buildURL(url string, x, y, z int) string {
-	url = strings.Replace(url, "{x}", strconv.Itoa(x), 1)
-	url = strings.Replace(url, "{y}", strconv.Itoa(y), 1)
-	url = strings.Replace(url, "{z}", strconv.Itoa(z), 1)
-	return url
-}
-
-// printHelp will print the help message and exit with a status code of 0
-func printHelp() {
-	fmt.Printf("\nFlags:\n" +
-		"  --url    Templated cache URL to prime. Ex: tile.company.com/{x}/{y}/{z}.png\n" +
-		"  --zoom   Max zoom depth to prime to. Usually in the range of 0-18 but can go deeper.\n" +
-		"  --cc     Maximum request concurrency. Defaults to 4 simultaneous requests." +
-		"             Take care not to exceed the rate limits of your tile provider!\n" +
-		"  --header Add headers to all requests. Usage `--header name:value`.\n" +
-		"  --help   Shows this help menu.\n\n" +
-		"Usage:\n" +
-		"  xyz --url tile.company.com/{x}/{y}/{z}.png --zoom 8\n")
-	os.Exit(0)
-}
-
 // tileRequest holds the zoom, x, and y values for a given tile
 type tileRequest struct {
 	zoom int
@@ -261,3 +239,84 @@ func (h *headerFlags) Set(value string) error {
 	h.header.Add(headerParts[0], headerParts[1])
 	return nil
 }
+
+// buildBarOptions builds a set of custom options for rendering a progress bar
+func buildBarOptions(zoomLevel int) []progressbar.Option {
+	return []progressbar.Option{
+		progressbar.OptionSetDescription(
+			fmt.Sprintf("Priming zoom level %d:", zoomLevel)),
+		progressbar.OptionShowCount(),
+		progressbar.OptionShowIts(),
+		progressbar.OptionSetItsString("tiles"),
+		progressbar.OptionSetPredictTime(true),
+		progressbar.OptionClearOnFinish(),
+	}
+}
+
+// buildURL places the given X, Y, and Z values into the given URL template.
+func buildURL(url string, x, y, z int) string {
+	url = strings.Replace(url, "{x}", strconv.Itoa(x), 1)
+	url = strings.Replace(url, "{y}", strconv.Itoa(y), 1)
+	url = strings.Replace(url, "{z}", strconv.Itoa(z), 1)
+	return url
+}
+
+// checkConfig ensures a proper configuration is provided to the tool
+func checkConfig(url string, zoom, cc int) {
+	// ensure a URL is provided
+	if url == "" {
+		fmt.Printf("No cache URL specified!\n" +
+			"Use `--url` to specify the cache URL.\n" +
+			"Use `--help` to learn more.\n")
+		os.Exit(1)
+	}
+
+	// ensure proper URL
+	_, err := liburl.Parse(url)
+	if err != nil {
+		fmt.Printf("Invalid cache URL provided. " +
+			"Must be a valid HTTP/HTTPS URL.\n")
+		os.Exit(1)
+	}
+
+	// ensure valid max zoom level
+	if zoom < 0 {
+		fmt.Printf("Provided max zoom level must be 0 or greater!\n")
+		os.Exit(1)
+	}
+
+	// ensure valid concurrency level
+	if cc < 1 {
+		fmt.Printf("Invalid concurrency level: %d. "+
+			"Must be at least 1.\n", cc)
+		os.Exit(1)
+	}
+
+	fmt.Printf("Config OK. URL: %s, Max zoom: %d, "+
+		"Concurrency: %d\n\n", url, zoom, cc)
+}
+
+// printHelp will print the help message and exit with a status code of 0
+func printHelp() {
+	fmt.Printf(helpMessage)
+	os.Exit(0)
+}
+
+const helpMessage = `
+Flags:
+  --url    Templated cache URL to prime. Ex: tile.company.com/{x}/{y}/{z}.png
+  --zoom   Max zoom depth to prime to. Usually in the range of 0-18 but can go deeper.
+  --cc     Maximum request concurrency. Defaults to 4 simultaneous requests.
+             Take care not to exceed the rate limits of your tile provider!
+  --header Add headers to all requests. Usage '--header name:value'
+  --help   Shows this help menu.
+
+Usage:
+  xyz --url tile.company.com/{x}/{y}/{z}.png --zoom 8
+`
+
+const usageUrl = "Templated cache URL to prime. Ex: tile.company.com/{x}/{y}/{z}.png"
+const usageZoom = "Max zoom depth to prime to. Defaults to 4. Usually in the range of 0-18 but can go deeper."
+const usageCc = "Maximum request concurrency. Defaults to 4 simultaneous requests. Take care not to exceed rate limits."
+const usageHeader = "Add headers to all requests. Usage '--header name:value'"
+const usageHelp = "Shows this help menu."
