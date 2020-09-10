@@ -33,6 +33,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/schollz/progressbar/v3"
 )
@@ -41,7 +42,7 @@ const version = "0.0.2"
 
 var (
 	headers     headerFlags
-	totalTiles  = int64(0)
+	totalTiles  = 0
 	failed      = 0
 	totalFailed = 0
 
@@ -76,16 +77,18 @@ func main() {
 
 	// run the primer
 	prime(*url, *zoom, *cc, headers)
-
-	os.Exit(0)
 }
 
 // prime populates work queues, iteratively and concurrently priming the given
 // cache by requesting all tiles at every zoom level up to the one you specify
 func prime(url string, zoom, cc int, headers headerFlags) {
+	startPrime := time.Now()
+
 	// begin priming caches starting at zoom level 0
 	for z := 0; z <= zoom; z++ {
-		numTiles := int64(math.Pow(float64(2), float64(2*z)))
+		startLevel := time.Now()
+
+		numTiles := int(math.Pow(float64(2), float64(2*z)))
 		totalTiles += numTiles
 		rowCol := int(math.Pow(float64(2), float64(z)))
 
@@ -124,30 +127,43 @@ func prime(url string, zoom, cc int, headers headerFlags) {
 		close(tiles)
 
 		// wait for acknowledgements
-		for a := 0; a < int(numTiles); a++ {
+		for a := 0; a < numTiles; a++ {
 			currAck := <-ack
 			if !currAck {
 				failed++
 			}
 		}
 
+		// calculate time taken to prime current zoom level
+		levelDuration := time.Since(startLevel)
+
+		// finish progress bar and clear it
 		_ = bar.Finish()
+
+		// Print stats about failed tiles
 		if failed > 0 {
 			fmt.Printf("%d tiles failed to prime in zoom level %d\n", failed, z)
 			totalFailed += failed
 			failed = 0
 		}
+
+		// Print stats about finished zoom level priming
+		fmt.Printf("Primed zoom level %d. [%d/%d tiles] in %s\n",
+			z, numTiles-failed, numTiles, levelDuration)
 	}
 
-	fmt.Printf("Finished priming. Sucessfully primed %d/%d tiles.\n",
-		totalTiles-int64(totalFailed), totalTiles)
+	totalDuration := time.Since(startPrime)
+
+	fmt.Printf("\nPrimed zoom levels 0-%d. [%d/%d tiles] in %s.\n\n",
+		zoom, totalTiles-totalFailed, totalTiles, totalDuration)
 }
 
 // worker spins up a worker to receive tile requests off of the
 // work queue. This enables request concurrency.
 func worker(payload *workerPayload) {
 	for tile := range payload.tiles {
-		req, err := http.NewRequest(http.MethodGet, buildURL(payload.url, tile.x, tile.y, tile.zoom), nil)
+		req, err := http.NewRequest(http.MethodGet,
+			buildURL(payload.url, tile.x, tile.y, tile.zoom), nil)
 		if err != nil {
 			// clear bar and log error before it redraws
 			_ = payload.bar.Clear()
@@ -208,7 +224,8 @@ func (h *headerFlags) Set(value string) error {
 	h.flat = append(h.flat, value)
 	headerParts := strings.Split(value, ":")
 	if len(headerParts) != 2 {
-		_ = fmt.Errorf("invalid header format specified: `%s`, must be in format `name:value`", value)
+		_ = fmt.Errorf("invalid header format specified: `%s`, "+
+			"must be in format `name:value`", value)
 		os.Exit(1)
 	}
 	if h.header == nil {
