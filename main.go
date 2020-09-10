@@ -74,27 +74,8 @@ func main() {
 		printHelp()
 	}
 
-	// ensure a URL is provided
-	if *url == "" {
-		fmt.Printf("No cache URL specified!\n" +
-			"Use `--url` to specify the cache URL.\n" +
-			"Use `--help` to learn more.\n")
-		os.Exit(1)
-	}
-
-	// ensure proper URL
-	_, err := liburl.Parse(*url)
-	if err != nil {
-		fmt.Printf("Invalid cache URL provided. Must be a valid HTTP/HTTPS URL.")
-		os.Exit(1)
-	}
-
-	if *cc < 1 {
-		fmt.Printf("Invalid concurrency level: %d. Must be at least 1.", *cc)
-		os.Exit(1)
-	}
-
-	fmt.Printf("Config OK. URL: %s, Max zoom: %d, Concurrency: %d\n\n", *url, *zoom, *cc)
+	// check the provided configuration
+	checkConfig(*url, *zoom, *cc)
 
 	// run the primer
 	prime(*url, *zoom, *cc, headers)
