@@ -1,5 +1,5 @@
 # xyz-cache-primer
-<p align="center"><img src=".github/xyz.png" alt="XYZ Logo"></p>
+<p align="center"><img src=".github/xyz.png" width="384" alt="XYZ Logo"></p>
 <p align="center">
   <a href="https://github.com/dechristopher/xyz-cache-primer/actions"><img alt="XYZ Build Status" src="https://github.com/dechristopher/xyz-cache-primer/workflows/Build/badge.svg"></a>
   <a href="https://goreportcard.com/report/github.com/dechristopher/xyz-cache-primer"><img alt="XYZ Go Report Card" src="https://goreportcard.com/badge/github.com/dechristopher/xyz-cache-primer"></a>
