@@ -55,9 +55,6 @@ func init() {
 	flag.Usage = func() {
 		printHelp()
 	}
-
-	// set progress bar iterations string
-	progressbar.OptionSetItsString("tiles/s")
 }
 
 func main() {
@@ -96,7 +93,7 @@ func prime(url string, zoom, cc int, headers headerFlags) {
 		tiles := make(chan tileRequest, numTiles)
 		ack := make(chan bool, numTiles)
 
-		bar := progressbar.Default(numTiles, fmt.Sprintf("Priming zoom level %d:", z))
+		bar := progressbar.NewOptions(numTiles, buildBarOptions(z)...)
 
 		// create worker payload
 		payload := workerPayload{
