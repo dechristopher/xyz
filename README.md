@@ -21,9 +21,9 @@ specified. Concurrency is optional and configurable. Headers for authentication 
 user agent spoofing can be specified using [command line flags](#usage).
 
 ## Usage
-XYZ has been designed to be as simple as possible. It will not have a rich feature set
-primarily because the scope of the problem it solves isn't very wide. Here is a brief
-overview on how to use the tool in its entirety:
+The design of XYZ is as simple as possible. It will not have a rich feature set
+primarily because the scope of the problem it solves isn't very wide. Here is a
+brief overview on how to use the tool in its entirety:
 
 ### Flags
 ```
