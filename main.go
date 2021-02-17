@@ -38,7 +38,7 @@ import (
 	"github.com/schollz/progressbar/v3"
 )
 
-const version = "0.0.3"
+const version = "0.0.4"
 
 var (
 	headers     headerFlags
@@ -62,6 +62,7 @@ func main() {
 	// define command line flags
 	url := flag.String("url", "", usageUrl)
 	zoom := flag.Int("zoom", 4, usageZoom)
+	minzoom := flag.Int("minzoom", 0, usageMinZoom)
 	cc := flag.Int("cc", 4, usageCc)
 	flag.Var(&headers, "header", usageHeader)
 	help := flag.Bool("help", false, usageHelp)
@@ -73,19 +74,19 @@ func main() {
 	}
 
 	// check the provided configuration
-	checkConfig(*url, *zoom, *cc)
+	checkConfig(*url, *zoom, *minzoom, *cc)
 
 	// run the primer
-	prime(*url, *zoom, *cc, headers)
+	prime(*url, *zoom, *minzoom, *cc, headers)
 }
 
 // prime populates work queues, iteratively and concurrently priming the given
 // cache by requesting all tiles at every zoom level up to the one you specify
-func prime(url string, zoom, cc int, headers headerFlags) {
+func prime(url string, zoom, minzoom, cc int, headers headerFlags) {
 	startPrime := time.Now()
 
 	// begin priming caches starting at zoom level 0
-	for z := 0; z <= zoom; z++ {
+	for z := minzoom; z <= zoom; z++ {
 		startLevel := time.Now()
 
 		numTiles := int(math.Pow(float64(2), float64(2*z)))
@@ -257,7 +258,7 @@ func buildURL(url string, x, y, z int) string {
 }
 
 // checkConfig ensures a proper configuration is provided to the tool
-func checkConfig(url string, zoom, cc int) {
+func checkConfig(url string, zoom, minzoom, cc int) {
 	// ensure a URL is provided
 	if url == "" {
 		fmt.Printf("No cache URL specified!\n" +
@@ -280,6 +281,12 @@ func checkConfig(url string, zoom, cc int) {
 		os.Exit(1)
 	}
 
+	// ensure valid minimum zoom level
+	if minzoom < 0 {
+		fmt.Printf("Provided minimum zoom level must be 0 or greater!\n")
+		os.Exit(1)
+	}
+
 	// ensure valid concurrency level
 	if cc < 1 {
 		fmt.Printf("Invalid concurrency level: %d. "+
@@ -288,7 +295,7 @@ func checkConfig(url string, zoom, cc int) {
 	}
 
 	fmt.Printf("Config OK. URL: %s, Max zoom: %d, "+
-		"Concurrency: %d\n\n", url, zoom, cc)
+		"Min zoom: %d, Concurrency: %d\n\n", url, zoom, minzoom, cc)
 }
 
 // printHelp will print the help message and exit with a status code of 0
@@ -299,12 +306,13 @@ func printHelp() {
 
 const helpMessage = `
 Flags:
-  --url    Templated cache URL to prime. Ex: tile.company.com/{x}/{y}/{z}.png
-  --zoom   Max zoom depth to prime to. Usually in the range of 0-18 but can go deeper.
-  --cc     Maximum request concurrency. Defaults to 4 simultaneous requests.
-             Take care not to exceed the rate limits of your tile provider!
-  --header Add headers to all requests. Usage '--header name:value'
-  --help   Shows this help menu.
+  --url     Templated cache URL to prime. Ex: tile.company.com/{x}/{y}/{z}.png
+  --zoom    Max zoom depth to prime to. Usually in the range of 0-18 but can go deeper.
+  --minzoom Minimum zoom level to start priming at. Defaults to 0.
+  --cc      Maximum request concurrency. Defaults to 4 simultaneous requests.
+              Take care not to exceed the rate limits of your tile provider!
+  --header  Add headers to all requests. Usage '--header name:value'
+  --help    Shows this help menu.
 
 Usage:
   xyz --url tile.company.com/{x}/{y}/{z}.png --zoom 8
@@ -312,6 +320,7 @@ Usage:
 
 const usageUrl = "Templated cache URL to prime. Ex: tile.company.com/{x}/{y}/{z}.png"
 const usageZoom = "Max zoom depth to prime to. Defaults to 4. Usually in the range of 0-18 but can go deeper."
+const usageMinZoom = "Minimum zoom level to start priming at. Defaults to 0."
 const usageCc = "Maximum request concurrency. Defaults to 4 simultaneous requests. Take care not to exceed rate limits."
 const usageHeader = "Add headers to all requests. Usage '--header name:value'"
 const usageHelp = "Shows this help menu."
